@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Hello OpenCV.js</title>
+<style>/* Stylesheet 1: */
+    body {
+        font: 100% Lucida Sans, Verdana;
+        margin: 20px;
+        line-height: 26px;
+    }
+
+    .container {
+        min-width: 900px;
+    }
+    
+    .wrapper {
+        position: relative;
+        overflow: auto;
+    }
+    
+    #top, #sidebar, #bottom, .menuitem {
+        border-radius: 4px;
+        margin: 4px;
+    }
+    
+    #top {
+        background-color: #4CAF50;
+        color: #ffffff;
+        padding: 15px;
+    }
+    
+    #menubar {
+        width: 200px;
+        float: left
+    }
+    
+    #main {
+        padding: 10px;
+        margin: 0 210px;
+    }
+    
+    #sidebar {
+        background-color: #32a4e7;
+        color: #ffffff;
+        padding: 10px;
+        width: 180px;
+        bottom: 0;
+        top: 0;
+        right: 0;
+        position: absolute;
+    }
+    
+    #bottom {
+        border: 1px solid #d4d4d4;
+        background-color: #f1f1f1;
+        text-align: center;
+        padding: 10px;
+        font-size: 70%;
+        line-height: 14px;
+    }
+    
+    #top h1, #top p, #menulist {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .menuitem {
+        background-color: #f1f1f1;
+        border: 1px solid #d4d4d4;
+        list-style-type: none;
+        padding: 2px;
+        cursor: pointer;
+    }
+    
+    .menuitem:hover {
+        background-color: #ffffff;
+    }
+    
+    .menuitem:first-child {
+       background-color:#4CAF50;
+       color: white;
+       font-weight:bold;
+    }
+    
+    a {
+        color: #000000;
+        text-decoration: underline;
+    }
+    
+    a:hover {
+        text-decoration: none;
+    }
+    
+    
+    @media (max-width: 800px) {
+        #sidebar {
+            width: auto;
+            position: relative;
+        } 
+        #main {
+            margin-right: 0;
+        }    
+           
+    }
+    
+    @media (max-width: 600px) {
+        #menubar {
+            width: auto;
+            float: none;
+        }
+        #main {
+            margin: 0;
+        }    
+    }
+    </style>
+</head>
+<body>
+<div class="container wrapper">
+    <div id="top">
+        <h2>Hello OpenCV.js</h2>
+    </div>
+    <div>
+        <p id="status">OpenCV.js is loading...</p>
+    </div>
+    <div class="wrapper">
+    <div class="inputoutput">
+        <div>
+            <canvas id="canvasInput" width="1366" height="768"></canvas>
+        </div>
+        <div class="caption">输入图片 <input type="file" id="fileInput" accept="image/*" name="file" /></div>
+    </div>
+    </div>
+    </div>
+    <div>
+    <div class="inputoutput">
+        <h3>二值化阈值设置</h3>
+        <input type="range" id="myRange" min="0" max="255" step="1" value="0">
+        <p id="demo"></p>
+        <p><button id="getImgBtn">获取图像</button><div class="caption">输出图片</div></p>
+        <div>
+            <canvas id="canvasOutput"></canvas>
+        </div>
+    </div>
+    </div>
+</div>
+<script type="text/javascript">
+let inputElement = document.getElementById('fileInput');
+let imgBtn = document.getElementById('getImgBtn');
+let img = new Image();
+let loading = true;
+let x = document.getElementById('myRange');
+document.getElementById("demo").innerHTML = x.value;
+inputElement.addEventListener('change', (e) => {
+    img.src = URL.createObjectURL(e.target.files[0]);
+}, false);
+x.addEventListener('change',(e) => {
+    p = x.value;
+    document.getElementById("demo").innerHTML = p ;
+    p = parseFloat(p)
+}, false);
+img.onload = function() {
+    let inCanvas = document.getElementById('canvasInput')
+    let inCanvasCtx = inCanvas.getContext('2d')
+    inCanvasCtx.drawImage(img,0,0,img.width,img.height,0,0,1366,768);
+    if(img.width!==1366 ||  img.height!=768) {
+        inCanvas.toBlob(function(blob) {
+            console.log()
+            img.src = URL.createObjectURL(blob);
+        })
+    }
+};
+imgBtn.addEventListener('click', (e) => {
+    if(loading) {
+        return alert('正在加载opencv.js和模型文件')
+    }
+    if(!img.src) {
+        return alert('请先上传图片')
+    }
+    let src = cv.imread('canvasInput');
+    let gray = new cv.Mat();
+    let gray2 = new cv.Mat();
+    let gray3 = new cv.Mat();
+    let ksize = new cv.Size(3,3);
+    cv.cvtColor(src, gray, cv.COLOR_BGR2GRAY);
+    cv.threshold (gray, gray2, p, 255, cv.THRESH_BINARY);
+    cv.imshow('canvasOutput',gray2);
+    src.delete();gray.delete();gray2.delete();
+});
+function onOpenUtilsReady() {
+    let utils = new Utils('errorMessage');
+    utils.loadOpenCv(() => {
+    let cvFile = 'opencv.js';
+    utils.createFileFromUrl(cvFile, cvFile, () => {
+        document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
+        loading = false;
+    });
+});
+}
+
+</script>
+<script async src="./utils.js" onload="onOpenUtilsReady();" type="text/javascript"></script>
+<!-- <script async src="./opencv.js" onload="onOpenCvReady();" type="text/javascript"></script> -->
+<style>
+.inputoutput{
+    display: inline-block;
+}
+</style>
+</body>
+</html>
