@@ -59,11 +59,6 @@
         font-size: 70%;
         line-height: 14px;
     }
-    #panel{
-        position: absolute;
-        top: 650px;
-        width: 250px;
-    }
     #top h1, #top p, #menulist {
         margin: 0;
         padding: 0;
@@ -137,13 +132,32 @@
             <ul id="menulist">
                 <div class="menuitem">输入图片<input type="file" id="fileInput" accept="image/*" name="file" /></div>
                 <div class="menuitem">保存文件</div>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <h4>二值化阈值设置</h4>
+                <input type="range" id="myRange" min="0" max="255" step="1" value="0">
+                <p id="demo"></p>
+                <button class="menuitem" id="getImgBtn">原图应用二值化</button>
+                <br>
+                <button class="menuitem" id="erode">图像腐蚀</button>
+                <button class="menuitem" id="dilate">图像膨胀</button>
+                <button class="menuitem" id="contourm">选取轮廓并计算比例</button></p>
+                <p id="areaOutput"></p>
             </ul>
         </div>
         <div id="main">
             <div>
                 <canvas id="canvasInput" width="640" height="360"></canvas>
             </div>
-            
             <hr>
             <div>
                 <div>输出图片</div>
@@ -162,17 +176,10 @@
         </div>
     </div>
 </div>
-<div id="panel">
-                <h4>二值化阈值设置</h4>
-                <input type="range" id="myRange" min="0" max="255" step="1" value="0">
-                <p id="demo"></p>
-                <button class="menuitem" id="getImgBtn">原图应用二值化</button>
-                <br>
-                <button class="menuitem" id="erode">图像腐蚀</button>
-                <button class="menuitem" id="dilate">图像膨胀</button>
-                <button class="menuitem" id="contourm">选取轮廓并计算比例</button></p>
-                <p id="areaOutput"></p>
+<div id="bottom">
+    <p>Created and Modfied By Sarira Shi #</p>
 </div>
+</body>
 <script type="text/javascript">
 let inputElement = document.getElementById('fileInput');
 let imgBtn = document.getElementById('getImgBtn');
@@ -285,8 +292,6 @@ contourm.addEventListener('click',(e) =>{
     else
         return alert('更改图像或二值化参数后再试试吧');
 })
-    
-            
 function onOpenUtilsReady() {
     let utils = new Utils('errorMessage');
     utils.loadOpenCv(() => {
