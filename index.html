@@ -118,9 +118,9 @@
     .title{
         height: 30px;
         background: purple;
-        color: white;
+        color: rgb(251, 8, 8);
     }
-    td{
+    td{ 
         height: 30px;
         padding-left: 5px;
     }
@@ -141,7 +141,7 @@
         </div>
         <div id="main">
             <div>
-                <canvas id="canvasInput" width="800" height="450"></canvas>
+                <canvas id="canvasInput" width="640" height="360"></canvas>
             </div>
             
             <hr>
@@ -154,9 +154,9 @@
             <h1>面积比例表</h1>
             <table border="1" cellspacing="0" cellpadding="0" style="text-align: left;margin-top: 20px;">
                 <tr class="title">
-                    <th>次序</th>
-                    <th>面积</th>
-                    <th>比例</th>
+                    <th>操作次序</th>
+                    <th>近似面积</th>
+                    <th>比例(%)</th>
                 </tr>
             </table>
         </div>
@@ -182,25 +182,29 @@ let x = document.getElementById('myRange');
 let r = 0;
 let p = 0;
 let fileOrder = 0;
+let q = 1;
 document.getElementById("demo").innerHTML = x.value;
 inputElement.addEventListener('change', (e) => {
     img.src = URL.createObjectURL(e.target.files[0]);
+    q = 1;
 }, false);
 x.addEventListener('change',(e) => {
     p = x.value;
     document.getElementById("demo").innerHTML = p ;
     p = parseFloat(p)
+    q = 1;
+    r = 0;
 }, false);
 img.onload = function() {
     let inCanvas = document.getElementById('canvasInput')
     let inCanvasCtx = inCanvas.getContext('2d')
-    inCanvasCtx.drawImage(img,0,0,img.width,img.height,0,0,800,450);
-    if(img.width!==800 ||  img.height!==450) {
+    inCanvasCtx.drawImage(img,0,0,img.width,img.height,0,0,640,360);
+    /*if(img.width!==640 ||  img.height!==360) {
         inCanvas.toBlob(function(blob) {
             console.log()
             img.src = URL.createObjectURL(blob);
         })
-    }
+    }*/
 };
 imgBtn.addEventListener('click', (e) => {
     if(loading) {
@@ -248,27 +252,38 @@ contourm.addEventListener('click',(e) =>{
     if(!r){
         return alert('请先应用二值化')
     }
+    if(q){
+    q = 0;
     let src = cv.imread('canvasOutput');
     let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
     cv.cvtColor(src, src, cv.COLOR_BGR2GRAY);
     let contours = new cv.MatVector();
     let hierarchy = new cv.Mat();
     // You can try more different parameters
-    cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-    // draw contours with random Scalar
+    cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
     let color = new cv.Scalar(255,255,0);
     for (let i = 0; i < contours.size(); ++i) {
         cv.drawContours(dst, contours, i, color, 1, cv.LINE_8, hierarchy, 100);
     }
     cv.imshow('canvasOutput', dst);
-    let cnt = contours.get(20);
-    let area = cv.contourArea(cnt);
+    let cnt = new cv.Mat();
+    let area = 0;
+    for (let i = 0; i < contours.size();++i)
+    {
+        cnt = contours.get(i);
+        area = area + cv.contourArea(cnt);
+    }
     areaOutput.innerHTML = area;
+    parseFloat(area);
     var table = document.getElementsByTagName('table')[0];
     var tr = document.createElement('tr');
-    tr.innerHTML = "<td>"+(++fileOrder)+"</td><td>"+area+"</td><td>"+area+"</td>";
+    var ratio = 100*area/230400;
+    tr.innerHTML = "<td>"+(++fileOrder)+"</td><td>"+area+"</td><td>"+ratio.toFixed(2)+"</td>";
     table.appendChild(tr);
     src.delete(); dst.delete(); contours.delete(); hierarchy.delete();
+    }
+    else
+        return alert('更改图像或二值化参数后再试试吧');
 })
     
             
