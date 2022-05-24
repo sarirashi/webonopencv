@@ -73,16 +73,6 @@
         cursor: pointer;
     }
     
-    .menuitem:hover {
-        background-color: #ffffff;
-    }
-    
-    .menuitem:first-child {
-       background-color:#4CAF50;
-       color: white;
-       font-weight:bold;
-    }
-    
     a {
         color: #000000;
         text-decoration: underline;
@@ -137,10 +127,16 @@
         <h3>二值化阈值设置</h3>
         <input type="range" id="myRange" min="0" max="255" step="1" value="0">
         <p id="demo"></p>
-        <p><button id="getImgBtn">获取图像</button><div class="caption">输出图片</div></p>
+        <p><button id="getImgBtn">原图应用二值化</button><div class="caption">输出图片</div></p>
         <div>
             <canvas id="canvasOutput"></canvas>
         </div>
+    </div>
+    <div class="panel">
+        <p><button id="erode">图像腐蚀</button></p>
+        <p><button id="dilate">图像膨胀</button></p>
+        <p><button id="contourm">选取轮廓并计算比例</button></p>
+        <p id="areaOutput"></p>
     </div>
     </div>
 </div>
@@ -150,6 +146,8 @@ let imgBtn = document.getElementById('getImgBtn');
 let img = new Image();
 let loading = true;
 let x = document.getElementById('myRange');
+let r = 0;
+let p = 0;
 document.getElementById("demo").innerHTML = x.value;
 inputElement.addEventListener('change', (e) => {
     img.src = URL.createObjectURL(e.target.files[0]);
@@ -180,13 +178,61 @@ imgBtn.addEventListener('click', (e) => {
     let src = cv.imread('canvasInput');
     let gray = new cv.Mat();
     let gray2 = new cv.Mat();
-    let gray3 = new cv.Mat();
-    let ksize = new cv.Size(3,3);
     cv.cvtColor(src, gray, cv.COLOR_BGR2GRAY);
     cv.threshold (gray, gray2, p, 255, cv.THRESH_BINARY);
     cv.imshow('canvasOutput',gray2);
+    r = 1;
     src.delete();gray.delete();gray2.delete();
 });
+erode.addEventListener('click',(e) =>{
+    if(!r){
+        return alert('请先应用二值化')
+    }
+    let src = cv.imread('canvasOutput');
+    let dst = new cv.Mat();
+    let M = cv.Mat.ones(2, 2, cv.CV_8U);
+    let anchor = new cv.Point(-1, -1);
+    // You can try more different parameters
+    cv.erode(src, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    cv.imshow('canvasOutput', dst);
+    src.delete();dst.delete(); M.delete();
+})
+dilate.addEventListener('click',(e) =>{
+    if(!r){
+        return alert('请先应用二值化')
+    }
+    let src = cv.imread('canvasOutput');
+    let dst = new cv.Mat();
+    let M = cv.Mat.ones(2, 2, cv.CV_8U);
+    let anchor = new cv.Point(-1, -1);
+    // You can try more different parameters
+    cv.dilate(src, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    cv.imshow('canvasOutput', dst);
+    src.delete();dst.delete(); M.delete();
+})
+contourm.addEventListener('click',(e) =>{
+    if(!r){
+        return alert('请先应用二值化')
+    }
+    let src = cv.imread('canvasOutput');
+    let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+    cv.cvtColor(src, src, cv.COLOR_BGR2GRAY);
+    let contours = new cv.MatVector();
+    let hierarchy = new cv.Mat();
+    // You can try more different parameters
+    cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+    // draw contours with random Scalar
+    let color = new cv.Scalar(255,255,0);
+    for (let i = 0; i < contours.size(); ++i) {
+        cv.drawContours(dst, contours, i, color, 1, cv.LINE_8, hierarchy, 100);
+    }
+    cv.imshow('canvasOutput', dst);
+    let cnt = contours.get(20);
+    let area = cv.contourArea(cnt);
+    areaOutput.innerHTML = area;
+    src.delete(); dst.delete(); contours.delete(); hierarchy.delete();area.delete();
+})
+
 function onOpenUtilsReady() {
     let utils = new Utils('errorMessage');
     utils.loadOpenCv(() => {
