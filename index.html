@@ -59,7 +59,11 @@
         font-size: 70%;
         line-height: 14px;
     }
-    
+    #panel{
+        position: absolute;
+        top: 650px;
+        width: 250px;
+    }
     #top h1, #top p, #menulist {
         margin: 0;
         padding: 0;
@@ -69,7 +73,7 @@
         background-color: #f1f1f1;
         border: 1px solid #d4d4d4;
         list-style-type: none;
-        padding: 2px;
+        padding: 4px;
         cursor: pointer;
     }
     
@@ -103,42 +107,71 @@
             margin: 0;
         }    
     }
+    .info{
+        width: 150px;
+        margin-bottom: 10px;
+    }
+    th{
+        width: 100px;
+        padding-left: 5px;
+    }
+    .title{
+        height: 30px;
+        background: purple;
+        color: white;
+    }
+    td{
+        height: 30px;
+        padding-left: 5px;
+    }
     </style>
 </head>
 <body>
 <div class="container wrapper">
     <div id="top">
         <h2>Hello OpenCV.js</h2>
-    </div>
-    <div>
         <p id="status">OpenCV.js is loading...</p>
     </div>
     <div class="wrapper">
-    <div class="inputoutput">
-        <div>
-            <canvas id="canvasInput" width="1366" height="768"></canvas>
+        <div id="menubar">
+            <ul id="menulist">
+                <div class="menuitem">输入图片<input type="file" id="fileInput" accept="image/*" name="file" /></div>
+                <div class="menuitem">保存文件</div>
+            </ul>
         </div>
-        <div class="caption">输入图片 <input type="file" id="fileInput" accept="image/*" name="file" /></div>
-    </div>
-    </div>
-    </div>
-    <div>
-    <div class="inputoutput">
-        <h3>二值化阈值设置</h3>
-        <input type="range" id="myRange" min="0" max="255" step="1" value="0">
-        <p id="demo"></p>
-        <p><button id="getImgBtn">原图应用二值化</button><div class="caption">输出图片</div></p>
-        <div>
-            <canvas id="canvasOutput"></canvas>
+        <div id="main">
+            <div>
+                <canvas id="canvasInput" width="800" height="450"></canvas>
+            </div>
+            
+            <hr>
+            <div>
+                <div>输出图片</div>
+                <canvas id="canvasOutput"></canvas>
+            </div>
+        </div>
+        <div id="sidebar">
+            <h1>面积比例表</h1>
+            <table border="1" cellspacing="0" cellpadding="0" style="text-align: left;margin-top: 20px;">
+                <tr class="title">
+                    <th>次序</th>
+                    <th>面积</th>
+                    <th>比例</th>
+                </tr>
+            </table>
         </div>
     </div>
-    <div class="panel">
-        <p><button id="erode">图像腐蚀</button></p>
-        <p><button id="dilate">图像膨胀</button></p>
-        <p><button id="contourm">选取轮廓并计算比例</button></p>
-        <p id="areaOutput"></p>
-    </div>
-    </div>
+</div>
+<div id="panel">
+                <h4>二值化阈值设置</h4>
+                <input type="range" id="myRange" min="0" max="255" step="1" value="0">
+                <p id="demo"></p>
+                <button class="menuitem" id="getImgBtn">原图应用二值化</button>
+                <br>
+                <button class="menuitem" id="erode">图像腐蚀</button>
+                <button class="menuitem" id="dilate">图像膨胀</button>
+                <button class="menuitem" id="contourm">选取轮廓并计算比例</button></p>
+                <p id="areaOutput"></p>
 </div>
 <script type="text/javascript">
 let inputElement = document.getElementById('fileInput');
@@ -148,6 +181,7 @@ let loading = true;
 let x = document.getElementById('myRange');
 let r = 0;
 let p = 0;
+let fileOrder = 0;
 document.getElementById("demo").innerHTML = x.value;
 inputElement.addEventListener('change', (e) => {
     img.src = URL.createObjectURL(e.target.files[0]);
@@ -160,8 +194,8 @@ x.addEventListener('change',(e) => {
 img.onload = function() {
     let inCanvas = document.getElementById('canvasInput')
     let inCanvasCtx = inCanvas.getContext('2d')
-    inCanvasCtx.drawImage(img,0,0,img.width,img.height,0,0,1366,768);
-    if(img.width!==1366 ||  img.height!=768) {
+    inCanvasCtx.drawImage(img,0,0,img.width,img.height,0,0,800,450);
+    if(img.width!==800 ||  img.height!==450) {
         inCanvas.toBlob(function(blob) {
             console.log()
             img.src = URL.createObjectURL(blob);
@@ -230,9 +264,14 @@ contourm.addEventListener('click',(e) =>{
     let cnt = contours.get(20);
     let area = cv.contourArea(cnt);
     areaOutput.innerHTML = area;
-    src.delete(); dst.delete(); contours.delete(); hierarchy.delete();area.delete();
+    var table = document.getElementsByTagName('table')[0];
+    var tr = document.createElement('tr');
+    tr.innerHTML = "<td>"+(++fileOrder)+"</td><td>"+area+"</td><td>"+area+"</td>";
+    table.appendChild(tr);
+    src.delete(); dst.delete(); contours.delete(); hierarchy.delete();
 })
-
+    
+            
 function onOpenUtilsReady() {
     let utils = new Utils('errorMessage');
     utils.loadOpenCv(() => {
