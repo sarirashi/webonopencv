@@ -188,12 +188,11 @@ let imgBtn = document.getElementById('getImgBtn');
 let img = new Image();
 let loading = true;
 let x = document.getElementById('myRange');
-let r = 0;
-let p = 0;
-let fileOrder = 0;
-let q = 1;
-let sw = 0;
-let name =  0;
+let r = 0;//信号量
+let p = 0;//信号量
+let q = 1;//信号量
+let fileOrder = 0;//表格操作次序
+let name =  0;//下载文件名称
 document.getElementById("demo").innerHTML = x.value;
 inputElement.addEventListener('change', (e) => {
     img.src = URL.createObjectURL(e.target.files[0]);
@@ -332,13 +331,13 @@ save.addEventListener('click',(e) =>{
     }
     var fullImage = new Image();
     var pos = document.getElementById('savefull');
-    let event = new MouseEvent('click');
+    let event = new MouseEvent('click');//创建单击事件
     const canvas = document.getElementById('fullImgOutput');
     fullImage.src = canvas.toDataURL('image/png');
     var url = fullImage.src.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
-    let a = document.createElement("a"); // 生成一个a元素 // 创建一个单击事件
+    let a = document.createElement("a"); // 生成一个a元素 
     a.download = (++name)+'.png' || "photo"; // 设置图片名称
-    a.href = url; // 将生成的URL设置为a.href属性
+    a.href = url; // 将生成的URL设置为a.href属性    
     a.dispatchEvent(event);
 })
 function onOpenUtilsReady() {
